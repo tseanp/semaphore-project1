@@ -11,5 +11,5 @@ pipelines:
             - name: Test Ping from Ubuntu to Windows
               commands:
                 - echo "Starting Ping Test"
-                - ping -c 4 <Windows_VM_IP>
+                - ping -c 4 10.1.0.85
 
