@@ -5,11 +5,14 @@ name: Ping Test Pipeline
 pipelines:
   branches:
     main:
-      - name: Ping Test Job
+      - name: Test Ping from Ubuntu to Windows
         task:
           jobs:
-            - name: Test Ping from Ubuntu to Windows
+            - name: Run Ping Test
+              environment_variables:
+                # Use the variable from the variable group
+                WINDOWS_IP: ${WINDOWS_TEST_IP}
               commands:
-                - echo "Starting Ping Test"
-                - ping -c 4 10.1.0.85
-
+                - echo "Starting the Ping Test"
+                - chmod +x ping-test.sh
+                - ./ping-test.sh
