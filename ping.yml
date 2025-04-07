@@ -1,1 +1,15 @@
+version: v1.0
+name: Ping Test Pipeline
+
+# Define your pipelines
+pipelines:
+  branches:
+    main:
+      - name: Ping Test Job
+        task:
+          jobs:
+            - name: Test Ping from Ubuntu to Windows
+              commands:
+                - echo "Starting Ping Test"
+                - ping -c 4 <Windows_VM_IP>
 
