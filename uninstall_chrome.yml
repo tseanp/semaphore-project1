@@ -1,40 +1,27 @@
 ---
-- name: Uninstall Google Chrome from web servers
+- name: Uninstall Google Chrome from Windows web servers
   hosts: web_servers
+  gather_facts: yes
   become: yes
+  become_method: runas  # Use runas to elevate privileges on Windows
   tasks:
-    - name: Check if Chrome is installed (for debian-based systems)
-      command: dpkg -l | grep google-chrome
+    - name: Check if Chrome is installed (Windows 64-bit)
+      win_command: powershell -Command "Get-ItemProperty HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object { $_.DisplayName -like 'Google Chrome' }"
       register: chrome_installed
       failed_when: false
       changed_when: false
 
-    - name: Uninstall Chrome on Debian-based systems
-      apt:
-        name: google-chrome-stable
+    - name: Uninstall Google Chrome on Windows
+      win_package:
+        name: Google Chrome
         state: absent
       when: chrome_installed.stdout != ""
       notify:
         - Clean up unused packages
 
-    - name: Check if Chrome is installed (for rpm-based systems)
-      command: rpm -qa | grep google-chrome
-      register: chrome_installed_rpm
-      failed_when: false
-      changed_when: false
-
-    - name: Uninstall Chrome on RPM-based systems
-      yum:
-        name: google-chrome-stable
-        state: absent
-      when: chrome_installed_rpm.stdout != ""
-      notify:
-        - Clean up unused packages
-
   handlers:
     - name: Clean up unused packages
-      apt:
-        autoremove: yes
-        autoclean: yes
-      when: ansible_facts.packages is defined and ansible_facts.packages is not empty
+      win_command: powershell -Command "Get-WmiObject -Class Win32_Product | Where-Object { $_.Name -like 'Google Chrome' } | ForEach-Object { $_.Uninstall() }"
       become: yes
+      become_method: runas
+
