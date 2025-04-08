@@ -1,6 +1,4 @@
-
-        Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome" | Select-Object -ExpandProperty UninstallString
-    ---
+---
 - name: Uninstall Google Chrome
   hosts: all
   tasks:
