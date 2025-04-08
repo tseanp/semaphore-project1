@@ -10,7 +10,7 @@
       register: chrome_install_key
       ignore_errors: yes
 
-    - name: Remove Google Chrome if installed
+    - name: Take out Google Chrome if installed
       win_package:
         name: Google Chrome
         state: absent
