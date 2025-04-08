@@ -1,0 +1,25 @@
+---
+- name: Install Google Chrome on Windows Server
+  hosts: web_servers
+  gather_facts: yes
+
+  tasks:
+    - name: Download Google Chrome Installer
+      win_get_url:
+        url: "https://dl.google.com/chrome/install/375.126/chrome_installer.exe"
+        dest: "C:\\Windows\\Temp\\chrome_installer.exe"
+      register: download_chrome
+
+    - name: Install Google Chrome
+      win_command: "C:\\Windows\\Temp\\chrome_installer.exe /silent /install"
+      when: download_chrome.changed
+
+    - name: Verify Google Chrome installation
+      win_stat:
+        path: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+      register: chrome_installed
+
+    - name: Check if Chrome was installed successfully
+      debug:
+        msg: "Google Chrome has been installed successfully!"
+      when: chrome_installed.stat.exists
