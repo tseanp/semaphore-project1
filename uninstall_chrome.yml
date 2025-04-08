@@ -11,9 +11,7 @@
       ignore_errors: yes
 
     - name: Uninstall Google Chrome if installed
-      win_package:
-        name: Google Chrome
-        state: absent
+      win_command: '"C:\\Program Files\\Google\\Chrome\\Application\\chrome_installer.exe" --uninstall --multi-install --chrome --system-level --force-uninstall'
       when: chrome_install_key is defined and chrome_install_key.key is not none
 
     - name: Verify Google Chrome Uninstallation
