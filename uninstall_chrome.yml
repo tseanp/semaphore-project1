@@ -1,38 +1,18 @@
----
-- name: Uninstall Google Chrome from Windows Server
-  hosts: web_servers
-  gather_facts: yes
 
-  tasks:
-    - name: Find Google Chrome Uninstall String in Registry
-      win_shell: |
         Get-ItemProperty -Path "HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome" | Select-Object -ExpandProperty UninstallString
-      register: chrome_uninstall_command
-      ignore_errors: yes
-
+    ---
+- name: Uninstall Google Chrome
+  hosts: all
+  tasks:
+    - name: Find Chrome uninstall command
+      win_registry_facts:
+        path: 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome'
+    
     - name: Debug Uninstall Command
       debug:
-        msg: "Uninstall Command: {{ chrome_uninstall_command.stdout }}"
+        msg: "{{ registry['HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome'].UninstallString }}"
 
-    - name: Check if the Uninstall Command is Valid
-      fail:
-        msg: "The Uninstall Command is empty or invalid!"
-      when: chrome_uninstall_command.stdout is none or chrome_uninstall_command.stdout == ""
-
-    - name: Debug the Uninstall Path and Flags
-      debug:
-        msg: "Uninstall Path: {{ chrome_uninstall_command.stdout }} /force-uninstall /verbose-logging"
-
-    - name: Uninstall Google Chrome using registry uninstall string
-      win_command: "{{ chrome_uninstall_command.stdout }} /force-uninstall /verbose-logging"
-      when: chrome_uninstall_command.stdout is not none and chrome_uninstall_command.stdout != ""
-
-    - name: Verify Google Chrome Uninstallation
-      win_stat:
-        path: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-      register: chrome_uninstalled
-
-    - name: Check if Chrome was uninstalled
-      debug:
-        msg: "Google Chrome has been uninstalled successfully!"
-      when: not chrome_uninstalled.stat.exists
+    - name: Run Chrome uninstall
+      win_command: "{{ registry['HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome'].UninstallString }} /silent"
+      args:
+        chdir: "C:\\Program Files\\Google\\Chrome\\Application\\"
