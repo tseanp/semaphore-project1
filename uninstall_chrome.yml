@@ -11,7 +11,7 @@
       ignore_errors: yes
 
     - name: Uninstall Google Chrome using registry uninstall string
-      win_command: "{{ chrome_uninstall_command.stdout }} /silent"
+      win_command: "{{ chrome_uninstall_command.stdout }}"
       when: chrome_uninstall_command.stdout is not none
 
     - name: Verify Google Chrome Uninstallation
