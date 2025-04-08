@@ -1,18 +1,40 @@
 ---
-- name: Uninstall Google Chrome
-  hosts: all
+- name: Uninstall Google Chrome from web servers
+  hosts: web_servers
+  become: yes
   tasks:
-    - name: Find Chrome uninstall command in registry
-      community.windows.win_registry:
-        path: 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome'
-        key: 'UninstallString'
-      register: chrome_uninstall
+    - name: Check if Chrome is installed (for debian-based systems)
+      command: dpkg -l | grep google-chrome
+      register: chrome_installed
+      failed_when: false
+      changed_when: false
 
-    - name: Debug Uninstall Command
-      debug:
-        msg: "{{ chrome_uninstall.value }}"
+    - name: Uninstall Chrome on Debian-based systems
+      apt:
+        name: google-chrome-stable
+        state: absent
+      when: chrome_installed.stdout != ""
+      notify:
+        - Clean up unused packages
 
-    - name: Run Chrome uninstall
-      win_command: "{{ chrome_uninstall.value }} /silent"
-      args:
-        chdir: "C:\\Program Files (x86)\\Google\\Chrome\\Application\\"
+    - name: Check if Chrome is installed (for rpm-based systems)
+      command: rpm -qa | grep google-chrome
+      register: chrome_installed_rpm
+      failed_when: false
+      changed_when: false
+
+    - name: Uninstall Chrome on RPM-based systems
+      yum:
+        name: google-chrome-stable
+        state: absent
+      when: chrome_installed_rpm.stdout != ""
+      notify:
+        - Clean up unused packages
+
+  handlers:
+    - name: Clean up unused packages
+      apt:
+        autoremove: yes
+        autoclean: yes
+      when: ansible_facts.packages is defined and ansible_facts.packages is not empty
+      become: yes
