@@ -1,0 +1,8 @@
+---
+- name: Ping web servers
+  hosts: web_servers
+  gather_facts: no
+
+  tasks:
+    - name: Ping the web server to check connectivity
+      ping:
