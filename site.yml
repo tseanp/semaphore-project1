@@ -1,8 +1,7 @@
 ---
-- name: Ping web servers
+- name: Ping Windows web servers
   hosts: web_servers
   gather_facts: no
-
   tasks:
-    - name: Ping the web server to check connectivity
-      ping:
+    - name: Ping the Windows web server to check connectivity
+      win_ping:
