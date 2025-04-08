@@ -6,7 +6,7 @@
   tasks:
     - name: Find Google Chrome Uninstall String in Registry
       win_registry:
-        path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome
+        path: HKLM\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome
         name: UninstallString
       register: chrome_uninstall_info
       ignore_errors: yes
