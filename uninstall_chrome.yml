@@ -2,15 +2,15 @@
 - name: Uninstall Google Chrome
   hosts: all
   tasks:
-    - name: Find Chrome uninstall command
+    - name: Find Chrome uninstall command in registry
       win_registry_facts:
         path: 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome'
     
     - name: Debug Uninstall Command
       debug:
-        msg: "{{ registry['HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome'].UninstallString }}"
+        msg: "{{ registry['HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Google Chrome'].UninstallString }}"
 
     - name: Run Chrome uninstall
-      win_command: "{{ registry['HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome'].UninstallString }} /silent"
+      win_command: "{{ registry['HKLM:\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Google Chrome'].UninstallString }} /silent"
       args:
-        chdir: "C:\\Program Files\\Google\\Chrome\\Application\\"
+        chdir: "C:\\Program Files (x86)\\Google\\Chrome\\Application\\"
