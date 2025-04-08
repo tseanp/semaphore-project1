@@ -1,0 +1,27 @@
+---
+- name: Uninstall Google Chrome from Windows Server
+  hosts: web_servers
+  gather_facts: yes
+
+  tasks:
+    - name: Find Google Chrome installation path
+      win_reg_stat:
+        path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome
+      register: chrome_install_key
+      ignore_errors: yes
+
+    - name: Uninstall Google Chrome
+      win_package:
+        name: Google Chrome
+        state: absent
+      when: chrome_install_key.found
+
+    - name: Verify Google Chrome Uninstallation
+      win_stat:
+        path: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+      register: chrome_uninstalled
+
+    - name: Check if Chrome was uninstalled
+      debug:
+        msg: "Google Chrome has been uninstalled successfully!"
+      when: not chrome_uninstalled.stat.exists
