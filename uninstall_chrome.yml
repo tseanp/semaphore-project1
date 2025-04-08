@@ -4,17 +4,17 @@
   gather_facts: yes
 
   tasks:
-    - name: Find Google Chrome installation path
+    - name: Find Google Chrome installation registry key
       win_reg_stat:
         path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome
       register: chrome_install_key
       ignore_errors: yes
 
-    - name: Uninstall Google Chrome
+    - name: Uninstall Google Chrome if installed
       win_package:
         name: Google Chrome
         state: absent
-      when: chrome_install_key.found
+      when: chrome_install_key is defined and chrome_install_key.stat.exists
 
     - name: Verify Google Chrome Uninstallation
       win_stat:
