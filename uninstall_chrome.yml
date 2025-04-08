@@ -10,9 +10,22 @@
       register: chrome_uninstall_command
       ignore_errors: yes
 
+    - name: Debug Uninstall Command
+      debug:
+        msg: "Uninstall Command: {{ chrome_uninstall_command.stdout }}"
+
+    - name: Check if the Uninstall Command is Valid
+      fail:
+        msg: "The Uninstall Command is empty or invalid!"
+      when: chrome_uninstall_command.stdout is none or chrome_uninstall_command.stdout == ""
+
+    - name: Debug the Uninstall Path and Flags
+      debug:
+        msg: "Uninstall Path: {{ chrome_uninstall_command.stdout }} /force-uninstall /verbose-logging"
+
     - name: Uninstall Google Chrome using registry uninstall string
-      win_command: "{{ chrome_uninstall_command.stdout }}"
-      when: chrome_uninstall_command.stdout is not none
+      win_command: "{{ chrome_uninstall_command.stdout }} /force-uninstall /verbose-logging"
+      when: chrome_uninstall_command.stdout is not none and chrome_uninstall_command.stdout != ""
 
     - name: Verify Google Chrome Uninstallation
       win_stat:
