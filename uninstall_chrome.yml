@@ -4,15 +4,15 @@
   gather_facts: yes
 
   tasks:
-    - name: Find Google Chrome installation registry key
-      win_reg_stat:
-        path: HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome
-      register: chrome_install_key
+    - name: Find Google Chrome Uninstall String in Registry
+      win_reg_facts:
+        path: HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Google Chrome
+      register: chrome_uninstall_info
       ignore_errors: yes
 
-    - name: Uninstall Google Chrome if installed
-      win_command: '"C:\\Program Files\\Google\\Chrome\\Application\\chrome_installer.exe" --uninstall --multi-install --chrome --system-level --force-uninstall'
-      when: chrome_install_key is defined and chrome_install_key.key is not none
+    - name: Uninstall Google Chrome using registry uninstall string
+      win_command: "{{ chrome_uninstall_info.ansible_facts['winreg']['HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Google Chrome']['UninstallString'] }} /silent"
+      when: chrome_uninstall_info.ansible_facts['winreg']['HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\Google Chrome'] is defined
 
     - name: Verify Google Chrome Uninstallation
       win_stat:
