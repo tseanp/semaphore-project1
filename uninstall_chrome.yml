@@ -10,11 +10,11 @@
       register: chrome_install_key
       ignore_errors: yes
 
-    - name: Take out Google Chrome if installed
+    - name: Uninstall Google Chrome if installed
       win_package:
         name: Google Chrome
         state: absent
-      when: chrome_install_key is defined and chrome_install_key.stat.exists
+      when: chrome_install_key is defined and chrome_install_key.key is not none
 
     - name: Verify Google Chrome Uninstallation
       win_stat:
