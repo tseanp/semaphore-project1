@@ -1,7 +1,7 @@
 ---
-- name: Ping Windows web servers
+- name: Pinging All VMs
   hosts: web_servers
   gather_facts: no
   tasks:
-    - name: Ping the Windows web server to check connectivity
+    - name: Pinging the VMs to check connectivity
       win_ping:
