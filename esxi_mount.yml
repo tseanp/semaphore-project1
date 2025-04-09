@@ -1,0 +1,58 @@
+---
+- name: Detect and Mount Existing Datastore on New Disk on ESXi 7 Host
+  hosts: esxi
+  gather_facts: no
+  tasks:
+
+    - name: Get list of current datastores on ESXi host
+      community.vmware.vmware_host_datastore_facts:
+        hostname: "{{ esxi_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
+      delegate_to: localhost
+      register: datastore_facts
+
+    - name: Get list of current disks on ESXi host
+      community.vmware.vmware_host_disk_facts:
+        hostname: "{{ esxi_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
+      delegate_to: localhost
+      register: disk_facts
+
+    - name: Find the new disk (unattached)
+      set_fact:
+        new_disk: "{{ disk_facts.disks | selectattr('state', 'equalto', 'unattached') | first }}"
+      when: disk_facts.disks is defined
+
+    - name: Check if a new unattached disk was found
+      fail:
+        msg: "No new unattached disk found on the ESXi host."
+      when: new_disk is not defined
+
+    - name: Get the datastore on the new disk (if any)
+      set_fact:
+        existing_datastore: "{{ datastore_facts.datastores | selectattr('path', 'search', new_disk.device) | first }}"
+      when: datastore_facts.datastores is defined
+
+    - name: Check if a datastore exists on the new disk
+      fail:
+        msg: "No existing datastore found on the new disk."
+      when: existing_datastore is not defined
+
+    - name: Mount the existing datastore
+      community.vmware.vmware_host_vmfs:
+        hostname: "{{ esxi_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
+        state: mounted
+        datastore: "{{ existing_datastore.name }}"
+      delegate_to: localhost
+      register: datastore_mount_result
+
+    - name: Show result of datastore mount
+      debug:
+        var: datastore_mount_result
