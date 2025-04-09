@@ -6,7 +6,7 @@
     - name: Ensure 'ansibleservice' user is present
       win_user:
         name: ansibleservice
-        password: "{{ lookup('env', 'ANSIBLE_PASSWORD') }}"
+        password: "{{ lookup('env', 'ANSIBLESERVICE_PASSWORD') }}"
         state: present
         update_password: always
         # Ensure the user is part of the local Administrators group if needed
@@ -14,4 +14,4 @@
           - Administrators
         password_never_expires: yes
       vars:
-        ansible_user: "{{ lookup('env', 'ANSIBLE_USERNAME') }}"
+        ansible_user: "{{ lookup('env', 'ANSIBLESERVICE_USERNAME') }}"
