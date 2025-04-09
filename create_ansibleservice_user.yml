@@ -1,16 +1,15 @@
 ---
-- name: Create ansibleservice user
+- name: Create ansibleservice user on Windows machine
   hosts: web_servers
-  gather_facts: no
+  gather_facts: no  # Skip gathering facts for faster execution
+
   tasks:
-    - name: Ensure 'ansibleservice' user is present
+    - name: Ensure '{{ SERVICE_USERNAME }}' user is present
       win_user:
-        name: ansibleservice
-        password: "{{ lookup('env', 'SERVICE_PASSWORD') }}"
-        state: present
-        update_password: always
+        name: "{{ SERVICE_USERNAME }}"  # Create user with the variable username
+        password: "{{ SERVICE_PASSWORD }}"  # Set password using the variable
+        state: present  # Ensure the user is created
+        update_password: always  # Always update the password
         groups:
-          - Administrators
-        password_never_expires: yes
-      vars:
-        ansible_user: "{{ lookup('env', 'SERVICE_USERNAME') }}"
+          - Administrators  # Optionally add the user to the Administrators group
+        password_never_expires: yes  # Set the password to never expire
