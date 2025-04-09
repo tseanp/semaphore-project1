@@ -23,3 +23,9 @@
       debug:
         msg: "Google Chrome has been installed successfully!"
       when: chrome_installed.stat.exists
+
+    - name: Delete Chrome Installer
+      win_file:
+        path: "C:\\Windows\\Temp\\chrome_installer.exe"
+        state: absent
+      when: chrome_installed.stat.exists
