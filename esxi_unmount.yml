@@ -1,0 +1,19 @@
+---
+- name: Unmount drive from ESXi 7 host
+  hosts: esxi
+  gather_facts: no
+  tasks:
+    - name: Ensure VMFS volume is unmounted
+      community.vmware.vmware_host_vmfs:
+        hostname: "{{ esxi_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
+        state: unmounted
+        datastore: "{{ datastore_name }}"
+      delegate_to: localhost
+      register: vmfs_unmount_result
+
+    - name: Show result of unmount operation
+      debug:
+        var: vmfs_unmount_result
