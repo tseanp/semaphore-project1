@@ -15,10 +15,11 @@
         state: "absent"
 
     - name: Detach disk 
-      community.vmware.vmware_host_disk:
+      community.vmware.vmware_vm_disk:
         hostname: "{{ esxi_host }}"
         username: "{{ esxi_user }}"
         password: "{{ esxi_password }}"
         validate_certs: no
-        device_name: "{{ vmfs_device_name }}"
+        vm_name: "{{ vm_name }}"  # Define the VM name to which the disk is attached
+        disk_name: "{{ vmfs_device_name }}"
         state: "absent"
