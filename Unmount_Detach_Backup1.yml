@@ -17,13 +17,7 @@
         datastore_name: "{{ datastore_name }}"
         state: absent
 
-    - name: Detach disk from host
-      vmware_host_storage:
-        hostname: "{{ esxi_host }}"
-        username: "{{ esxi_user }}"
-        password: "{{ esxi_password }}"
-        validate_certs: no
-        device_names:
-          - "{{ vmfs_device_name }}"
-        detach: true
-        esxi_hostname: "{{ esxi_host }}"
+    - name: Detach disk using esxcli
+      shell: |
+        esxcli storage core device set --state=off --device={{ vmfs_device_name }}
+      delegate_to: localhost
