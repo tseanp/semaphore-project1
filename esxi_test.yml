@@ -3,9 +3,8 @@
   tasks:
     - name: Ensure VMFS datastore is mounted
       community.vmware.vmware_host_vmfs:
-        hostname: "your-vmware-host"
-        username: "your-username"
-        password: "your-password"
+        hostname: "10.1.0.9"
+        username: "root"
+        password: "@dmin8307&me"
         state: "present"
-        vmfs_datastore_name: "your-datastore-name"
-        vmfs_datastore_size_gb: 10
+        vmfs_datastore_name: "Main_ESXi_OS
