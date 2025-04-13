@@ -1,22 +1,36 @@
-- name: Mount VMFS datastore to ESXi host
+---
+- name: Attach and Mount Datastore and Disk
   hosts: localhost
-  gather_facts: false
+  gather_facts: no
   collections:
     - community.vmware
-
   vars:
-    datastore_name: "Backup_1"
     vmfs_device_name: "naa.5000c50079286feb"
-
+    datastore_name: "Backup_1"
   tasks:
-    - name: Mount datastore "{{ datastore_name }}"
-      community.vmware.vmware_host_datastore:
-        hostname: "{{ vcenter_hostname }}"
-        username: "{{ vcenter_username }}"
-        password: "{{ vcenter_password }}"
-        validate_certs: false
-        esxi_hostname: "{{ esxi_hostname }}"
+    - name: Reattach disk via SSH to ESXi host
+      ansible.builtin.shell: |
+        esxcli storage core device set --state=on --device={{ vmfs_device_name }}
+      vars:
+        ansible_user: "{{ esxi_user }}"
+        ansible_password: "{{ esxi_password }}"
+        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+      delegate_to: "{{ esxi_host }}"
+      become: true
+      become_method: su
+
+    - name: Rescan storage adapters to detect reattached disk
+      vmware_host_scanhba:
+        hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
+
+    - name: Mount the datastore
+      vmware_host_datastore:
+        hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
         datastore_name: "{{ datastore_name }}"
-        vmfs_device_name: "{{ vmfs_device_name }}"
-        datastore_type: vmfs
         state: present
