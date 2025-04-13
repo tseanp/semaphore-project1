@@ -1,0 +1,23 @@
+- name: Unmount and detach VMFS datastore
+  hosts: localhost
+  gather_facts: false
+  collections:
+    - community.vmware
+
+  vars:
+    vcenter_hostname: "10.1.0.9"
+    vcenter_username: "root"
+    vcenter_password: "@dmin8307&me"
+    esxi_hostname: "10.1.0.9"
+    datastore_name: "Backup_1"
+
+  tasks:
+    - name: Unmount VMFS datastore
+      community.vmware.vmware_host_datastore:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: false
+        esxi_hostname: "{{ esxi_hostname }}"
+        datastore_name: "{{ datastore_name }}"
+        state: absent
