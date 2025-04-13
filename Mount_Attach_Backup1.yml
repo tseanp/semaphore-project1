@@ -34,4 +34,5 @@
         password: "{{ esxi_password }}"
         validate_certs: no
         datastore_name: "{{ datastore_name }}"
+        datastore_type: vmfs
         state: present
