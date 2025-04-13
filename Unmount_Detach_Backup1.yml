@@ -1,30 +1,28 @@
-- name: Unmount and detach VMFS datastore from ESXi host
+- name: Unmount and Detach Datastore and Disk
   hosts: localhost
-  gather_facts: false
-  collections:
-    - community.vmware
-
+  gather_facts: no
   vars:
-    datastore_name: "Backup_1"
-    vmfs_device_name: "naa.5000c50079286feb"
-
+    datastore_name: "Backup_1"  # Name of the datastore to unmount
+    vmfs_device_name: "naa.5000c50079286feb"  # Device name of the disk
   tasks:
     - name: Unmount datastore "{{ datastore_name }}"
       community.vmware.vmware_host_datastore:
-        hostname: "{{ vcenter_hostname }}"
-        username: "{{ vcenter_username }}"
-        password: "{{ vcenter_password }}"
-        validate_certs: false
-        esxi_hostname: "{{ esxi_hostname }}"
+        hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
         datastore_name: "{{ datastore_name }}"
-        state: absent
+        state: "absent"
 
     - name: Detach disk "{{ vmfs_device_name }}"
-      community.vmware.vmware_host_disk:
-        hostname: "{{ vcenter_hostname }}"
-        username: "{{ vcenter_username }}"
-        password: "{{ vcenter_password }}"
-        validate_certs: false
-        esxi_hostname: "{{ esxi_hostname }}"
+      community.vmware.vmware_host_disk_info:
+        hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
         device_name: "{{ vmfs_device_name }}"
-        state: detached
+      register: disk_info
+
+    - name: Check if disk info exists
+      debug:
+        var: disk_info
