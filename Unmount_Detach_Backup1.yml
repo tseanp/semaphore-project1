@@ -22,7 +22,7 @@
         esxcli storage core device set --state=off --device={{ vmfs_device_name }}
       vars:
         ansible_user: "{{ esxi_user }}"
-        ansible_password: "{{ esxi_pass }}"
+        ansible_password: "{{ esxi_password }}"
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
       delegate_to: "{{ esxi_host }}"
       become: true
