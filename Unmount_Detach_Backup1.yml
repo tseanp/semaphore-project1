@@ -1,4 +1,4 @@
-- name: Unmount and detach VMFS datastore
+- name: Unmount VMFS datastore from ESXi host
   hosts: localhost
   gather_facts: false
   collections:
@@ -12,7 +12,7 @@
     datastore_name: "Backup_1"
 
   tasks:
-    - name: Unmount VMFS datastore
+    - name: Unmount datastore "{{ datastore_name }}"
       community.vmware.vmware_host_datastore:
         hostname: "{{ vcenter_hostname }}"
         username: "{{ vcenter_username }}"
