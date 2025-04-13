@@ -1,4 +1,4 @@
-- name: Unmount VMFS datastore from ESXi host
+- name: Unmount and detach VMFS datastore from ESXi host
   hosts: localhost
   gather_facts: false
   collections:
@@ -6,6 +6,7 @@
 
   vars:
     datastore_name: "Backup_1"
+    vmfs_device_name: "naa.5000c50079286feb"
 
   tasks:
     - name: Unmount datastore "{{ datastore_name }}"
@@ -17,3 +18,13 @@
         esxi_hostname: "{{ esxi_hostname }}"
         datastore_name: "{{ datastore_name }}"
         state: absent
+
+    - name: Detach disk "{{ vmfs_device_name }}"
+      community.vmware.vmware_host_disk:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: false
+        esxi_hostname: "{{ esxi_hostname }}"
+        device_name: "{{ vmfs_device_name }}"
+        state: detached
