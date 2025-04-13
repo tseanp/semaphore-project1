@@ -1,0 +1,11 @@
+- name: Test vmware_host_vmfs
+  hosts: localhost
+  tasks:
+    - name: Ensure VMFS datastore is mounted
+      community.vmware.vmware_host_vmfs:
+        hostname: "your-vmware-host"
+        username: "your-username"
+        password: "your-password"
+        state: "present"
+        vmfs_datastore_name: "your-datastore-name"
+        vmfs_datastore_size_gb: 10
