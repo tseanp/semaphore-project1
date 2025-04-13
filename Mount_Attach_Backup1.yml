@@ -5,7 +5,6 @@
   collections:
     - community.vmware
   vars:
-    ansible_python_interpreter: /usr/bin/python3
     vmfs_device_name: "naa.5000c50079286feb"
     datastore_name: "Backup_1"
   tasks:
