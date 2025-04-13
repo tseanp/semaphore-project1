@@ -18,4 +18,5 @@
         esxi_hostname: "{{ esxi_hostname }}"
         datastore_name: "{{ datastore_name }}"
         vmfs_device_name: "{{ vmfs_device_name }}"
+        datastore_type: vmfs
         state: present
