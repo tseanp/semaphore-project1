@@ -5,10 +5,6 @@
     - community.vmware
 
   vars:
-    vcenter_hostname: "10.1.0.9"
-    vcenter_username: "root"
-    vcenter_password: "@dmin8307&me"
-    esxi_hostname: "10.1.0.9"
     datastore_name: "Backup_1"
 
   tasks:
