@@ -1,5 +1,5 @@
 - name: Unmount and Detach Datastore and Disk
-  hosts: esxi
+  hosts: localhost
   gather_facts: no
   vars:
     datastore_name: "Backup_1"  # Name of the datastore to unmount
