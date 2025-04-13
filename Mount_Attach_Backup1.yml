@@ -5,6 +5,7 @@
   collections:
     - community.vmware
   vars:
+    ansible_python_interpreter: /usr/bin/python3
     vmfs_device_name: "naa.5000c50079286feb"
     datastore_name: "Backup_1"
   tasks:
@@ -25,6 +26,7 @@
         username: "{{ esxi_user }}"
         password: "{{ esxi_password }}"
         validate_certs: no
+        esxi_hostname: "{{ esxi_host }}"
 
     - name: Mount the datastore
       vmware_host_datastore:
