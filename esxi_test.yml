@@ -7,4 +7,4 @@
         username: "root"
         password: "@dmin8307&me"
         state: "present"
-        vmfs_datastore_name: "Main_ESXi_OS
+        vmfs_datastore_name: "Main_ESXi_OS"
