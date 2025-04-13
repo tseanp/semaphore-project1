@@ -1,12 +1,15 @@
+---
 - name: Unmount and Detach Datastore and Disk
   hosts: localhost
   gather_facts: no
+  collections:
+    - community.vmware
   vars:
     datastore_name: "Backup_1"  # Name of the datastore to unmount
     vmfs_device_name: "naa.5000c50079286feb"  # Device name of the disk
   tasks:
-    - name: Unmount datastore 
-      community.vmware.vmware_host_datastore:
+    - name: Unmount datastore
+      vmware.vmware_host_datastore:
         hostname: "{{ esxi_host }}"
         username: "{{ esxi_user }}"
         password: "{{ esxi_password }}"
@@ -14,12 +17,11 @@
         datastore_name: "{{ datastore_name }}"
         state: "absent"
 
-    - name: Detach disk 
-      community.vmware.vmware_vm_disk:
+    - name: Detach disk
+      vmware.vmware_host_storage_disk:
         hostname: "{{ esxi_host }}"
         username: "{{ esxi_user }}"
         password: "{{ esxi_password }}"
         validate_certs: no
-        vm_name: "{{ vm_name }}"  # Define the VM name to which the disk is attached
-        disk_name: "{{ vmfs_device_name }}"
+        device_name: "{{ vmfs_device_name }}"
         state: "absent"
