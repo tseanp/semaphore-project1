@@ -17,7 +17,13 @@
         datastore_name: "{{ datastore_name }}"
         state: absent
 
-    - name: Detach disk using esxcli
-      shell: |
+    - name: Detach disk via SSH to ESXi host
+      ansible.builtin.shell: |
         esxcli storage core device set --state=off --device={{ vmfs_device_name }}
-      delegate_to: localhost
+      vars:
+        ansible_user: "{{ esxi_user }}"
+        ansible_password: "{{ esxi_pass }}"
+        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+      delegate_to: "{{ esxi_host }}"
+      become: true
+      become_method: su
