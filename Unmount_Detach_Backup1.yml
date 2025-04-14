@@ -7,6 +7,7 @@
   vars:
     datastore_name: "Backup_1"
     vmfs_device_name: "naa.5000c50079286feb"
+      
       tasks:
     - name: Unmount datastore
       vmware_host_datastore:
