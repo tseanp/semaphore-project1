@@ -20,7 +20,7 @@
         state: absent
 
     - name: Detach disk via SSH to ESXi host
-      ansible.builtin.shell: >
+      ansible.builtin.raw: >
         esxcli storage core device set --state=off --device={{ vmfs_device_name }}
       delegate_to: "{{ esxi_host }}"
       vars:
