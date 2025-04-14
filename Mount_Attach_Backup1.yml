@@ -7,7 +7,7 @@
   vars:
     vmfs_device_name: "naa.5000c50079286feb"
     datastore_name: "Backup_1"
-    ansible_python_interpreter: /opt/semaphore/apps/ansible/11.1.0/venv/bin/python3
+
   tasks:
     - name: Reattach disk via SSH to ESXi host
       ansible.builtin.shell: |
