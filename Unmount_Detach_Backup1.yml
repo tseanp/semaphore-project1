@@ -4,11 +4,12 @@
   gather_facts: no
   collections:
     - community.vmware
+
   vars:
     datastore_name: "Backup_1"
     vmfs_device_name: "naa.5000c50079286feb"
-      
-      tasks:
+ 
+  tasks:
     - name: Unmount datastore
       vmware_host_datastore:
         hostname: "{{ esxi_host }}"
@@ -19,12 +20,12 @@
         state: absent
 
     - name: Detach disk via SSH to ESXi host
-      ansible.builtin.shell: |
+      ansible.builtin.shell: >
         esxcli storage core device set --state=off --device={{ vmfs_device_name }}
+      delegate_to: "{{ esxi_host }}"
       vars:
         ansible_user: "{{ esxi_user }}"
-        ansible_password: "{{ esxi_password }}"
-        ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
-      delegate_to: "{{ esxi_host }}"
-      become: true
-      become_method: su
+        ansible_ssh_pass: "{{ esxi_password }}"
+        ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+        ansible_python_interpreter: /bin/sh
+      become: false
