@@ -11,17 +11,15 @@
     esxi_host: "your-esxi-host"
     esxi_user: "your-esxi-user"
     esxi_password: "your-esxi-password"
-    datacenter: "your-datacenter-name"  # Add your datacenter name here
 
   tasks:
-    - name: Unmount datastore
-      vmware_host_datastore:
-        hostname: "{{ esxi_host }}"
-        username: "{{ esxi_user }}"
-        password: "{{ esxi_password }}"
-        validate_certs: no
-        datastore_name: "{{ datastore_name }}"
-        state: absent
+    - name: Unmount datastore using raw esxcli
+      ansible.builtin.raw: >
+        esxcli storage filesystem unmount -l {{ datastore_name }}
+      delegate_to: "{{ esxi_host }}"
+      vars:
+        ansible_ssh_pass: "{{ esxi_password }}"
+        ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
     - name: Wait up to 30s for datastore to unmount
       ansible.builtin.shell: |
@@ -39,16 +37,14 @@
       failed_when: unmount_check.rc != 0
       delegate_to: "{{ esxi_host }}"
       vars:
-        ansible_user: "{{ esxi_user }}"
         ansible_ssh_pass: "{{ esxi_password }}"
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
-    - name: Detach disk from ESXi
+    - name: Detach disk from ESXi using raw esxcli
       ansible.builtin.raw: >
         esxcli storage core device set --state=off --device={{ vmfs_device_name }}
       when: unmount_check.rc == 0
       delegate_to: "{{ esxi_host }}"
       vars:
-        ansible_user: "{{ esxi_user }}"
         ansible_ssh_pass: "{{ esxi_password }}"
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
