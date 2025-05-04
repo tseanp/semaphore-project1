@@ -14,8 +14,8 @@
     esxi_password: "your-esxi-password"
 
   tasks:
-    - name: Get VM disk information
-      vmware_guest_disk_facts:
+    - name: Get VM disk details
+      community.vmware.vmware_guest_disk:
         hostname: "{{ esxi_host }}"
         username: "{{ esxi_user }}"
         password: "{{ esxi_password }}"
