@@ -1,22 +1,4 @@
 ---
-- name: Unmount and Detach Datastore and Disk
-  hosts: localhost
-  gather_facts: no
-  collections:
-    - community.vmware
-
-  vars:
-    datastore_name: "Backup_1"
-    vmfs_device_name: "naa.5000c50079286feb"
- 
-  tasks:
-    - name: Unmount datastore
-      vmware_host_datastore:
-        hostname: "{{ esxi_host }}"
-        username: "{{ esxi_user }}"
-        password: "{{ esxi_password }}"
-        validate_certs: no
-        datastore_name: "{{ datastore_name }}"---
 - name: Safely Unmount and Detach Datastore and Disk
   hosts: localhost
   gather_facts: no
@@ -68,16 +50,3 @@
         ansible_ssh_pass: "{{ esxi_password }}"
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
         ansible_python_interpreter: /bin/sh
-
-        state: absent
-
-    - name: Detach disk via SSH to ESXi host
-      ansible.builtin.raw: >
-        esxcli storage core device set --state=off --device={{ vmfs_device_name }}
-      delegate_to: "{{ esxi_host }}"
-      vars:
-        ansible_user: "{{ esxi_user }}"
-        ansible_ssh_pass: "{{ esxi_password }}"
-        ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
-        ansible_python_interpreter: /bin/sh
-      become: false
