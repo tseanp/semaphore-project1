@@ -39,17 +39,10 @@
         ansible_ssh_pass: "{{ esxi_password }}"
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
-    - name: Fail if detach confirmation variable is not YES
-      fail:
-        msg: "Detach not confirmed. Set confirm_detach=YES to proceed."
-      when: confirm_detach != "YES"
-
     - name: Detach disk only if unmount confirmed
       ansible.builtin.raw: >
         esxcli storage core device set --state=off --device={{ vmfs_device_name }}
-      when:
-        - unmount_check.rc == 0
-        - confirm_detach == "YES"
+      when: unmount_check.rc == 0
       delegate_to: "{{ esxi_host }}"
       vars:
         ansible_user: "{{ esxi_user }}"
