@@ -6,10 +6,23 @@
     - community.vmware
 
   vars:
+    vm_name: "your-vm-name"
     datastore_name: "Backup_1"
     vmfs_device_name: "naa.5000c50079286feb"
+    esxi_host: "your-esxi-host"
+    esxi_user: "your-esxi-user"
+    esxi_password: "your-esxi-password"
 
   tasks:
+    - name: Get VM disk information
+      vmware_vm_vm_disco:
+        hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
+        vm_id: "{{ vm_name }}"
+      register: vm_disk_info
+
     - name: Unmount datastore
       vmware_host_datastore:
         hostname: "{{ esxi_host }}"
@@ -19,30 +32,40 @@
         datastore_name: "{{ datastore_name }}"
         state: absent
 
-    - name: Wait up to 30s for datastore to unmount
-      ansible.builtin.raw: |
+    - name: Detach disk from VM
+      community.vmware.vmware_guest_disk:
+        hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
+        vm_id: "{{ vm_name }}"
+        disk_id: "{{ vm_disk_info.disk[0].disk_id }}"  # Use the disk ID of the VM you want to detach
+        state: absent
+
+    - name: Wait for disk detachment
+      ansible.builtin.shell: |
         timeout=30
         while [ $timeout -gt 0 ]; do
-          if ! esxcli storage filesystem list | grep -q "{{ datastore_name }}"; then
+          if ! esxcli storage core device list | grep -q "{{ vmfs_device_name }}"; then
             exit 0
           fi
           sleep 2
           timeout=$((timeout - 2))
         done
         exit 1
-      register: unmount_check
+      register: detachment_check
       changed_when: false
-      failed_when: unmount_check.rc != 0
+      failed_when: detachment_check.rc != 0
       delegate_to: "{{ esxi_host }}"
       vars:
         ansible_user: "{{ esxi_user }}"
         ansible_ssh_pass: "{{ esxi_password }}"
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
-    - name: Detach disk only if unmount confirmed
+    - name: Detach device from ESXi
       ansible.builtin.raw: >
         esxcli storage core device set --state=off --device={{ vmfs_device_name }}
-      when: unmount_check.rc == 0
+      when: detachment_check.rc == 0
       delegate_to: "{{ esxi_host }}"
       vars:
         ansible_user: "{{ esxi_user }}"
