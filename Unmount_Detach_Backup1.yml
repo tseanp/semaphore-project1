@@ -20,7 +20,7 @@
         state: absent
 
     - name: Wait up to 30s for datastore to unmount
-      ansible.builtin.shell: |
+      ansible.builtin.raw: |
         timeout=30
         while [ $timeout -gt 0 ]; do
           if ! esxcli storage filesystem list | grep -q "{{ datastore_name }}"; then
@@ -38,15 +38,25 @@
         ansible_user: "{{ esxi_user }}"
         ansible_ssh_pass: "{{ esxi_password }}"
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
-        ansible_python_interpreter: /bin/sh
+
+    - name: Confirm before detaching disk
+      pause:
+        prompt: "Datastore '{{ datastore_name }}' is unmounted. Type YES to detach device '{{ vmfs_device_name }}':"
+      register: detach_confirmation
+
+    - name: Fail if confirmation not given
+      fail:
+        msg: "User did not confirm. Skipping disk detach."
+      when: detach_confirmation.user_input != "YES"
 
     - name: Detach disk only if unmount confirmed
       ansible.builtin.raw: >
         esxcli storage core device set --state=off --device={{ vmfs_device_name }}
-      when: unmount_check.rc == 0
+      when:
+        - unmount_check.rc == 0
+        - detach_confirmation.user_input == "YES"
       delegate_to: "{{ esxi_host }}"
       vars:
         ansible_user: "{{ esxi_user }}"
         ansible_ssh_pass: "{{ esxi_password }}"
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
-        ansible_python_interpreter: /bin/sh
