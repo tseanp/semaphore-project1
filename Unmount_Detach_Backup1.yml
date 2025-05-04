@@ -16,7 +16,59 @@
         username: "{{ esxi_user }}"
         password: "{{ esxi_password }}"
         validate_certs: no
+        datastore_name: "{{ datastore_name }}"---
+- name: Safely Unmount and Detach Datastore and Disk
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - community.vmware
+
+  vars:
+    datastore_name: "Backup_1"
+    vmfs_device_name: "naa.5000c50079286feb"
+
+  tasks:
+    - name: Unmount datastore
+      vmware_host_datastore:
+        hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_password }}"
+        validate_certs: no
         datastore_name: "{{ datastore_name }}"
+        state: absent
+
+    - name: Wait up to 30s for datastore to unmount
+      ansible.builtin.shell: |
+        timeout=30
+        while [ $timeout -gt 0 ]; do
+          if ! esxcli storage filesystem list | grep -q "{{ datastore_name }}"; then
+            exit 0
+          fi
+          sleep 2
+          timeout=$((timeout - 2))
+        done
+        exit 1
+      register: unmount_check
+      changed_when: false
+      failed_when: unmount_check.rc != 0
+      delegate_to: "{{ esxi_host }}"
+      vars:
+        ansible_user: "{{ esxi_user }}"
+        ansible_ssh_pass: "{{ esxi_password }}"
+        ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+        ansible_python_interpreter: /bin/sh
+
+    - name: Detach disk only if unmount confirmed
+      ansible.builtin.raw: >
+        esxcli storage core device set --state=off --device={{ vmfs_device_name }}
+      when: unmount_check.rc == 0
+      delegate_to: "{{ esxi_host }}"
+      vars:
+        ansible_user: "{{ esxi_user }}"
+        ansible_ssh_pass: "{{ esxi_password }}"
+        ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+        ansible_python_interpreter: /bin/sh
+
         state: absent
 
     - name: Detach disk via SSH to ESXi host
