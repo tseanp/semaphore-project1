@@ -15,7 +15,7 @@
 
   tasks:
     - name: Get VM disk information
-      vmware_vm_vm_disco:
+      vmware_guest_disk_facts:
         hostname: "{{ esxi_host }}"
         username: "{{ esxi_user }}"
         password: "{{ esxi_password }}"
@@ -39,7 +39,7 @@
         password: "{{ esxi_password }}"
         validate_certs: no
         vm_id: "{{ vm_name }}"
-        disk_id: "{{ vm_disk_info.disk[0].disk_id }}"  # Use the disk ID of the VM you want to detach
+        disk_id: "{{ vm_disk_info.disks[0].disk_id }}"  # Use the disk ID of the VM you want to detach
         state: absent
 
     - name: Wait for disk detachment
