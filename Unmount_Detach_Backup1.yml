@@ -39,22 +39,17 @@
         ansible_ssh_pass: "{{ esxi_password }}"
         ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
-    - name: Confirm before detaching disk
-      pause:
-        prompt: "Datastore '{{ datastore_name }}' is unmounted. Type YES to detach device '{{ vmfs_device_name }}':"
-      register: detach_confirmation
-
-    - name: Fail if confirmation not given
+    - name: Fail if detach confirmation variable is not YES
       fail:
-        msg: "User did not confirm. Skipping disk detach."
-      when: detach_confirmation.user_input != "YES"
+        msg: "Detach not confirmed. Set confirm_detach=YES to proceed."
+      when: confirm_detach != "YES"
 
     - name: Detach disk only if unmount confirmed
       ansible.builtin.raw: >
         esxcli storage core device set --state=off --device={{ vmfs_device_name }}
       when:
         - unmount_check.rc == 0
-        - detach_confirmation.user_input == "YES"
+        - confirm_detach == "YES"
       delegate_to: "{{ esxi_host }}"
       vars:
         ansible_user: "{{ esxi_user }}"
