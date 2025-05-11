@@ -1,5 +1,5 @@
 ---
-- name: Mount Backup datastores on ESXi
+- name: Attach disks starting with naa.5000
   hosts: localhost
   gather_facts: false
 
@@ -7,26 +7,27 @@
     esxi_hostname: "{{ esxi_hostname }}"
     esxi_user: "{{ esxi_user }}"
     esxi_password: "{{ esxi_password }}"
+    validate_certs: false
 
   tasks:
-    - name: Get list of datastores on the ESXi host
+    - name: Get all VMFS datastores
       community.vmware.vmware_datastore_info:
         hostname: "{{ esxi_hostname }}"
         username: "{{ esxi_user }}"
         password: "{{ esxi_password }}"
-        validate_certs: false
+        validate_certs: "{{ validate_certs }}"
       register: datastore_info
 
-    - name: Filter datastores with names starting with 'Backup'
+    - name: Filter disks with naa.5000 prefix
       set_fact:
-        backup_datastores: "{{ datastore_info.datastores | selectattr('name', 'match', '^Backup.*') | list }}"
+        naa_disks: "{{ datastore_info.datastores | selectattr('url', 'search', 'naa.5000') | list }}"
 
-    - name: Mount Backup datastores
+    - name: Mount naa.5000 disks as datastores
       community.vmware.vmware_host_datastore:
         hostname: "{{ esxi_hostname }}"
         username: "{{ esxi_user }}"
         password: "{{ esxi_password }}"
-        validate_certs: false
+        validate_certs: "{{ validate_certs }}"
         datastore_name: "{{ item.name }}"
         state: present
-      loop: "{{ backup_datastores }}"
+      loop: "{{ naa_disks }}"
