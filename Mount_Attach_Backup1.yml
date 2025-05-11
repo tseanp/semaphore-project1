@@ -4,7 +4,7 @@
   gather_facts: false
 
   tasks:
-    - name: Rescan all HBA adapters
+    - name: Rescan all HBA adapters on the ESXi host
       community.vmware.vmware_host_scanhba:
         hostname: "{{ esxi_hostname }}"
         username: "{{ esxi_user }}"
