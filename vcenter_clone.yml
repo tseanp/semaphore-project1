@@ -1,5 +1,5 @@
 ---
-- name: Clone VM to another datastore and remove from inventory
+- name: Clone VM and remove from inventory (ESXi host)
   hosts: localhost
   gather_facts: no
   vars:
@@ -9,28 +9,25 @@
     validate_certs: no
 
   tasks:
-    - name: Clone the VM to a new datastore
+    - name: Clone VM to a new datastore
       community.vmware.vmware_guest:
-        hostname: "{{ vcenter_hostname }}"
-        username: "{{ vcenter_username }}"
-        password: "{{ vcenter_password }}"
+        hostname: "{{ esxi_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ esxi_password }}"
         validate_certs: "{{ validate_certs }}"
         name: "{{ clone_vm }}"
-        template: no
-        state: poweredoff
+        template: false
+        template_src: "{{ source_vm }}"
         datastore: "{{ target_datastore }}"
         folder: "/"
-        clone:
-          name: "{{ clone_vm }}"
-          template: false
-          source: "{{ source_vm }}"
-          power_on: false
+        state: poweredoff
+        esxi_hostname: "{{ esxi_hostname }}"
 
     - name: Remove cloned VM from inventory
       community.vmware.vmware_guest:
-        hostname: "{{ vcenter_hostname }}"
-        username: "{{ vcenter_username }}"
-        password: "{{ vcenter_password }}"
+        hostname: "{{ esxi_hostname }}"
+        username: "{{ esxi_username }}"
+        password: "{{ esxi_password }}"
         validate_certs: "{{ validate_certs }}"
         name: "{{ clone_vm }}"
         state: absent
