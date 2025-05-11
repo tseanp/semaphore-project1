@@ -1,0 +1,52 @@
+---
+- name: Clone Test2 VM to Backup_1 and remove from inventory
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    vcenter_hostname: "{{ vcenter_hostname }}"
+    vcenter_user: "{{ vcenter_user }}"
+    vcenter_password: "{{ vcenter_password }}"
+    validate_certs: false
+
+    source_vm: "Test2"
+    clone_vm: "Test2-Clone"
+    target_datastore: "Backup_1"
+    datacenter_name: "{{ datacenter_name }}"
+    cluster_name: "{{ cluster_name }}"
+    resource_pool: "{{ resource_pool | default('Resources') }}"
+
+  tasks:
+    - name: Clone VM to target datastore
+      community.vmware.vmware_guest:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: false
+        name: "{{ clone_vm }}"
+        template: false
+        state: poweredoff
+        folder: "/"
+        datacenter: "{{ datacenter_name }}"
+        datastore: "{{ target_datastore }}"
+        cluster: "{{ cluster_name }}"
+        resource_pool: "{{ resource_pool }}"
+        wait_for_ip_address: no
+        clone:
+          name: "{{ source_vm }}"
+          template: false
+
+    - name: Pause before unregistering
+      ansible.builtin.pause:
+        seconds: 10
+
+    - name: Remove cloned VM from inventory (keep files on disk)
+      community.vmware.vmware_guest:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_user }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: false
+        name: "{{ clone_vm }}"
+        state: absent
+        datacenter: "{{ datacenter_name }}"
+        delete_from_disk: false
