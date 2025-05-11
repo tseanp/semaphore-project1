@@ -14,7 +14,7 @@
         hostname: "{{ esxi_hostname }}"
         username: "{{ esxi_username }}"
         password: "{{ esxi_password }}"
-        validate_certs: "{{ validate_certs }}"
+        validate_certs: no
         name: "{{ clone_vm }}"
         template: false
         template_src: "{{ source_vm }}"
