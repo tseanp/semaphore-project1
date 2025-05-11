@@ -7,7 +7,7 @@
   tasks:
     - name: Get list of datastores on the ESXi host
       community.vmware.vmware_datastore_info:
-      validate_certs: false
+        validate_certs: false
       register: datastore_info
 
     - name: Filter datastores starting with 'Backup'
