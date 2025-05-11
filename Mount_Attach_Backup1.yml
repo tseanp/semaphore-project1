@@ -1,23 +1,14 @@
 ---
-- name: Rescan and mount Backup datastores on ESXi
+- name: Mount Backup datastores on ESXi
   hosts: localhost
   gather_facts: false
 
+  vars:
+    esxi_hostname: "{{ esxi_hostname }}"
+    esxi_user: "{{ esxi_user }}"
+    esxi_password: "{{ esxi_password }}"
+
   tasks:
-    - name: Rescan all HBA adapters on the ESXi host
-      community.vmware.vmware_vm_vmfs:
-        hostname: "{{ esxi_hostname }}"
-        username: "{{ esxi_user }}"
-        password: "{{ esxi_password }}"
-        validate_certs: false
-        state: "rescan"
-        datastore_name: "{{ item.name }}"
-      loop: "{{ backup_datastores }}"  # Loop through datastores if needed
-
-    - name: Wait a few seconds for storage to populate
-      ansible.builtin.pause:
-        seconds: 10
-
     - name: Get list of datastores on the ESXi host
       community.vmware.vmware_datastore_info:
         hostname: "{{ esxi_hostname }}"
@@ -26,11 +17,11 @@
         validate_certs: false
       register: datastore_info
 
-    - name: Filter Backup datastores
+    - name: Filter datastores with names starting with 'Backup'
       set_fact:
         backup_datastores: "{{ datastore_info.datastores | selectattr('name', 'match', '^Backup.*') | list }}"
 
-    - name: Attach/mount Backup datastores
+    - name: Mount Backup datastores
       community.vmware.vmware_host_datastore:
         hostname: "{{ esxi_hostname }}"
         username: "{{ esxi_user }}"
