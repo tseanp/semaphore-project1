@@ -1,9 +1,8 @@
 ---
-- name: Unmount and detach datastores starting with 'Backup' on ESXi
+- name: Detach datastores starting with 'Backup' on ESXi
   hosts: localhost
   gather_facts: false
 
-  # No need to define vars here if they're passed in externally (e.g., via Semaphore or Tower)
   tasks:
     - name: Get list of datastores on the ESXi host
       community.vmware.vmware_datastore_info:
@@ -17,16 +16,6 @@
       set_fact:
         backup_datastores: "{{ datastore_info.datastores | selectattr('name', 'match', '^Backup.*') | list }}"
 
-    - name: Unmount Backup datastores
-      community.vmware.vmware_host_datastore:
-        hostname: "{{ esxi_hostname }}"
-        username: "{{ esxi_user }}"
-        password: "{{ esxi_password }}"
-        validate_certs: false
-        datastore_name: "{{ item.name }}"
-        state: unmounted
-      loop: "{{ backup_datastores }}"
-
     - name: Detach Backup datastores
       community.vmware.vmware_host_datastore:
         hostname: "{{ esxi_hostname }}"
@@ -34,5 +23,5 @@
         password: "{{ esxi_password }}"
         validate_certs: false
         datastore_name: "{{ item.name }}"
-        state: detached
+        state: absent
       loop: "{{ backup_datastores }}"
