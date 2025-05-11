@@ -1,44 +1,41 @@
 ---
-- name: Attach and Mount Datastore and Disk
+- name: Attach/mount Backup datastores on ESXi
   hosts: localhost
-  gather_facts: no
-  collections:
-    - community.vmware
-
-  vars:
-    esxi_host: "10.1.0.9"                 # Define if not included in inventory
-    esxi_user: "root"
-    esxi_password: "your_password"
-    vmfs_device_name: "naa.5000c50079286feb"
-    datastore_name: "Backup_1"
+  gather_facts: false
 
   tasks:
-    - name: Reattach disk via SSH to ESXi host
-      ansible.builtin.raw: >
-        esxcli storage core device set --state=on --device={{ vmfs_device_name }}
-      delegate_to: "{{ esxi_host }}"
-      vars:
-        ansible_user: "{{ esxi_user }}"
-        ansible_ssh_pass: "{{ esxi_password }}"
-        ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
-        ansible_python_interpreter: /bin/sh
-      become: false
-
-    - name: Rescan storage adapters to detect reattached disk
-      vmware_host_scanhba:
-        hostname: "{{ esxi_host }}"
+    - name: Get list of all datastores on the ESXi host
+      community.vmware.vmware_datastore_info:
+        hostname: "{{ esxi_hostname }}"
         username: "{{ esxi_user }}"
         password: "{{ esxi_password }}"
-        validate_certs: no
-        esxi_hostname: "{{ esxi_host }}"
+        validate_certs: false
+      register: datastore_info
 
-    - name: Mount the datastore
-      vmware_host_datastore:
-        hostname: "{{ esxi_host }}"
+    - name: Get list of currently mounted datastores
+      community.vmware.vmware_host_datastore_facts:
+        hostname: "{{ esxi_hostname }}"
         username: "{{ esxi_user }}"
         password: "{{ esxi_password }}"
-        validate_certs: no
-        datastore_name: "{{ datastore_name }}"
-        datastore_type: vmfs
-        vmfs_device_name: "{{ vmfs_device_name }}"
+        validate_certs: false
+      register: mounted_info
+
+    - name: Filter Backup datastores that are not currently mounted
+      set_fact:
+        backup_unmounted_datastores: >-
+          {{
+            datastore_info.datastores
+            | selectattr('name', 'match', '^Backup.*')
+            | reject('extract', 'name', mounted_info.datastores | map(attribute='name') | list)
+            | list
+          }}
+
+    - name: Attach/mount Backup datastores
+      community.vmware.vmware_host_datastore:
+        hostname: "{{ esxi_hostname }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_password }}"
+        validate_certs: false
+        datastore_name: "{{ item.name }}"
         state: present
+      loop: "{{ backup_unmounted_datastores }}"
