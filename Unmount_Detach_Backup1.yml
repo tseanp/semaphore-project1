@@ -3,6 +3,7 @@
   hosts: localhost
   gather_facts: false
 
+  # No need to define vars here if they're passed in externally (e.g., via Semaphore or Tower)
   tasks:
     - name: Get list of datastores on the ESXi host
       community.vmware.vmware_datastore_info:
