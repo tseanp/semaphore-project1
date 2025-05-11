@@ -5,12 +5,14 @@
 
   tasks:
     - name: Rescan all HBA adapters on the ESXi host
-      community.vmware.vmware_host_hba:
+      community.vmware.vmware_vm_vmfs:
         hostname: "{{ esxi_hostname }}"
         username: "{{ esxi_user }}"
         password: "{{ esxi_password }}"
         validate_certs: false
         state: "rescan"
+        datastore_name: "{{ item.name }}"
+      loop: "{{ backup_datastores }}"  # Loop through datastores if needed
 
     - name: Wait a few seconds for storage to populate
       ansible.builtin.pause:
