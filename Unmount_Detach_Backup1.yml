@@ -1,50 +1,35 @@
 ---
-- name: Safely Unmount and Detach Datastore and Disk
+- name: Unmount and detach datastores starting with 'Backup' on ESXi
   hosts: localhost
-  gather_facts: no
-  collections:
-    - community.vmware
-
+  gather_facts: false
   vars:
-    datastore_name: "Backup_1"
-    vmfs_device_name: "naa.5000c50079286feb"
-    esxi_host: "your-esxi-host"
-    esxi_user: "your-esxi-user"
-    esxi_password: "your-esxi-password"
 
   tasks:
-    - name: Unmount datastore using raw esxcli
-      ansible.builtin.raw: >
-        esxcli storage filesystem unmount -l {{ datastore_name }}
-      delegate_to: "{{ esxi_host }}"
-      vars:
-        ansible_ssh_pass: "{{ esxi_password }}"
-        ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+    - name: Get list of datastores on the ESXi host
+      community.vmware.vmware_datastore_info:
+      validate_certs: false
+      register: datastore_info
 
-    - name: Wait up to 30s for datastore to unmount
-      ansible.builtin.shell: |
-        timeout=30
-        while [ $timeout -gt 0 ]; do
-          if ! esxcli storage filesystem list | grep -q "{{ datastore_name }}"; then
-            exit 0
-          fi
-          sleep 2
-          timeout=$((timeout - 2))
-        done
-        exit 1
-      register: unmount_check
-      changed_when: false
-      failed_when: unmount_check.rc != 0
-      delegate_to: "{{ esxi_host }}"
-      vars:
-        ansible_ssh_pass: "{{ esxi_password }}"
-        ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+    - name: Filter datastores starting with 'Backup'
+      set_fact:
+        backup_datastores: "{{ datastore_info.datastores | selectattr('name', 'match', '^Backup.*') | list }}"
 
-    - name: Detach disk from ESXi using raw esxcli
-      ansible.builtin.raw: >
-        esxcli storage core device set --state=off --device={{ vmfs_device_name }}
-      when: unmount_check.rc == 0
-      delegate_to: "{{ esxi_host }}"
-      vars:
-        ansible_ssh_pass: "{{ esxi_password }}"
-        ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+    - name: Unmount Backup datastores
+      community.vmware.vmware_host_datastore:
+        hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_password }}"
+        validate_certs: false
+        datastore_name: "{{ item.name }}"
+        state: unmounted
+      loop: "{{ backup_datastores }}"
+
+    - name: Detach Backup datastores
+      community.vmware.vmware_host_datastore:
+        hostname: "{{ esxi_host }}"
+        username: "{{ esxi_user }}"
+        password: "{{ esxi_password }}"
+        validate_certs: false
+        datastore_name: "{{ item.name }}"
+        state: detached
+      loop: "{{ backup_datastores }}"
