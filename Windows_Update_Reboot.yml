@@ -4,12 +4,6 @@
   gather_facts: no
   tasks:
 
-    - name: Ensure Task Scheduler is running
-      win_service:
-        name: Schedule
-        start_mode: auto
-        state: started
-
     - name: Reboot system if a shutdown is in progress
       win_reboot:
       register: reboot_trigger
