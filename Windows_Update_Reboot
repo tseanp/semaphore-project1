@@ -1,0 +1,27 @@
+---
+- name: Windows Update and Reboot
+  hosts: windows
+  gather_facts: no
+  tasks:
+
+    - name: Install all available Windows updates
+      win_updates:
+        category_names:
+          - SecurityUpdates
+          - CriticalUpdates
+          - UpdateRollups
+          - Updates
+        reboot: yes
+
+    - name: Wait for system to become reachable after reboot
+      wait_for_connection:
+        timeout: 600
+        delay: 30
+
+    - name: Ensure system is fully up after reboot
+      win_command: 'whoami'
+      register: whoami_result
+
+    - name: Print result of whoami
+      debug:
+        var: whoami_result.stdout
