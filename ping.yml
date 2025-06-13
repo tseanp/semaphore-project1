@@ -1,0 +1,7 @@
+---
+- name: Ping all Windows machines in web_servers
+  hosts: web_servers
+  gather_facts: no
+  tasks:
+    - name: Ping Windows hosts using win_ping
+      win_ping:
