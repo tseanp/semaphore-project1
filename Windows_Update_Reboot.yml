@@ -4,15 +4,18 @@
   gather_facts: no
   tasks:
 
-    - name: Reboot system if a shutdown is in progress
-      win_reboot:
-      register: reboot_trigger
+    - name: Attempt reboot if shutdown is pending
+      block:
+        - name: Try to reboot
+          win_reboot:
+          register: reboot_trigger
+          ignore_errors: yes
 
-    - name: Wait for host to come back
-      wait_for_connection:
-        timeout: 600
-        delay: 30
-      when: reboot_trigger.rebooted
+        - name: Wait for system if reboot failed due to shutdown already in progress
+          wait_for_connection:
+            timeout: 600
+            delay: 30
+          when: reboot_trigger is failed
 
     - name: Install all available Windows updates
       win_updates:
@@ -24,13 +27,13 @@
         reboot: yes
       register: update_result
 
-    - name: Wait for system to become reachable after updates
+    - name: Wait for system to become reachable after updates (if rebooted)
       wait_for_connection:
         timeout: 600
         delay: 30
       when: update_result.reboot_required
 
-    - name: Ensure system is fully up after reboot
+    - name: Confirm machine is online and responsive
       win_command: 'whoami'
       register: whoami_result
 
