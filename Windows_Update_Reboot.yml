@@ -4,6 +4,22 @@
   gather_facts: no
   tasks:
 
+    - name: Ensure Task Scheduler is running
+      win_service:
+        name: Schedule
+        start_mode: auto
+        state: started
+
+    - name: Reboot system if a shutdown is in progress
+      win_reboot:
+      register: reboot_trigger
+
+    - name: Wait for host to come back
+      wait_for_connection:
+        timeout: 600
+        delay: 30
+      when: reboot_trigger.rebooted
+
     - name: Install all available Windows updates
       win_updates:
         category_names:
@@ -12,16 +28,18 @@
           - UpdateRollups
           - Updates
         reboot: yes
+      register: update_result
 
-    - name: Wait for system to become reachable after reboot
+    - name: Wait for system to become reachable after updates
       wait_for_connection:
         timeout: 600
         delay: 30
+      when: update_result.reboot_required
 
     - name: Ensure system is fully up after reboot
       win_command: 'whoami'
       register: whoami_result
 
-    - name: Print result of whoami
+    - name: Print user context of remote system
       debug:
         var: whoami_result.stdout
