@@ -8,7 +8,8 @@
   vars:
     datacenter_name: "Datacenter"
     datastore_name: "Backup_1"
-    vm_folder: "vm"  
+    vm_folder: "vm" 
+    date_suffix: "{{ lookup('pipe', 'date +%m%d%Y') }}"
     vms_to_clone:
       - { template: "BlueIris",  name: "BlueIris_Backup" }
       - { template: "JellyFin",  name: "JellyFin_Backup" }
@@ -21,8 +22,8 @@
         password: "{{ vcenter_password }}"
         validate_certs: no
         datacenter: "{{ datacenter_name }}"
-        folder: "{{ vm_folder }}"        # required for vCenter
-        name: "{{ item.name }}"
+        folder: "{{ vm_folder }}"  
+        name: "{{ item.base_name }}{{ date_suffix }}"
         template: "{{ item.template }}"
         datastore: "{{ datastore_name }}"
         state: poweredoff
