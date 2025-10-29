@@ -1,0 +1,28 @@
+---
+- name: Run Windows Readiness Powershell Script
+  hosts: web_servers
+  gather_facts: no
+  vars:
+    script_url: "https://raw.githubusercontent.com/tseanp/semaphore-project1/main/os_readiness.ps1"
+    script_path: "C:\\Temp\\os_readiness.ps1"
+
+  tasks:
+    - name: Ensure temp directory exists
+      ansible.windows.win_file:
+        path: "C:\\Temp"
+        state: directory
+
+    - name: Download PowerShell script from GitHub
+      ansible.windows.win_get_url:
+        url: "{{ script_url }}"
+        dest: "{{ script_path }}"
+        force: yes
+
+    - name: Execute PowerShell script
+      ansible.windows.win_shell: |
+        PowerShell -ExecutionPolicy Bypass -File "{{ script_path }}"
+      register: script_output
+
+    - name: Display script output
+      ansible.builtin.debug:
+        var: script_output.stdout
