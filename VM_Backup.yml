@@ -35,5 +35,3 @@
         Get-VM -Name "{{ item.base_name }}{{ date_suffix }}" | Remove-VM -DeletePermanently:$false -Confirm:$false
         Disconnect-VIServer -Confirm:$false
       loop: "{{ vms_to_clone }}"
-        remove_from_disk: no
-      loop: "{{ vms_to_clone }}"
