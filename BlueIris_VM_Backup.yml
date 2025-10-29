@@ -5,7 +5,7 @@
   tasks:
     - name: Clone a VM
       vmware_guest:
-        hostname: {{ vcener_hostname }}
+        hostname: {{ vcenter_hostname }}
         username: {{ vcenter_username }}
         password: {{ vcenter_password }}
         validate_certs: no
