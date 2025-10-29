@@ -1,0 +1,16 @@
+- name: Clone VM without PowerCLI
+  hosts: localhost
+  collections:
+    - community.vmware
+  tasks:
+    - name: Clone a VM
+      vmware_guest:
+        hostname: {{ vcener_hostname }}
+        username: {{ vcenter_username }}
+        password: {{ vcenter_password }}
+        validate_certs: no
+        name: BlueIris_Backup
+        template: BlueIris
+        datacenter: Datacenter
+        datastore: Backup_1
+        state: poweredoff
