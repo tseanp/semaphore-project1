@@ -28,3 +28,14 @@
         datastore: "{{ datastore_name }}"
         state: poweredoff
       loop: "{{ vms_to_clone }}"
+    
+    - name: Removing backups from Inventory
+      community.vmware.vmware_guest_vm_deregister:
+        hostname: "{{ vcenter_hostname }}"
+        username: "{{ vcenter_username }}"
+        password: "{{ vcenter_password }}"
+        validate_certs: no
+        name: "{{ item.base_name }}{{ date_suffix }}"
+        state: absent
+        remove_from_disk: no
+      loop: "{{ vms_to_clone }}"
