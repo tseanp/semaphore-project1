@@ -26,8 +26,4 @@
         template: "{{ item.template }}"
         datastore: "{{ datastore_name }}"
         state: poweredoff
-        hardware:
-          memory_mb: 4096
-          num_cpus: 2
-        wait_for_ip_address: no
-      loop: "{{ vms_to_clone }}"
+    loop: "{{ vms_to_clone }}"
