@@ -26,4 +26,4 @@
         template: "{{ item.template }}"
         datastore: "{{ datastore_name }}"
         state: poweredoff
-    loop: "{{ vms_to_clone }}"
+  loop: "{{ vms_to_clone }}"
