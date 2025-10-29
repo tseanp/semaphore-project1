@@ -1,16 +1,33 @@
-- name: Clone VM without PowerCLI
+---
+- name: Clone BlueIris and JellyFin VMs in vCenter
   hosts: localhost
+  gather_facts: no
   collections:
     - community.vmware
+
+  vars:
+    datacenter_name: "Datacenter"
+    datastore_name: "Backup_1"
+    vm_folder: "vm"  
+    vms_to_clone:
+      - { template: "BlueIris",  name: "BlueIris_Backup" }
+      - { template: "JellyFin",  name: "JellyFin_Backup" }
+
   tasks:
-    - name: Clone a VM
+    - name: Clone VMs in vCenter
       vmware_guest:
         hostname: "{{ vcenter_hostname }}"
         username: "{{ vcenter_username }}"
         password: "{{ vcenter_password }}"
         validate_certs: no
-        name: BlueIris_Backup
-        template: BlueIris
-        datacenter: Datacenter
-        datastore: Backup_1
+        datacenter: "{{ datacenter_name }}"
+        folder: "{{ vm_folder }}"        # required for vCenter
+        name: "{{ item.name }}"
+        template: "{{ item.template }}"
+        datastore: "{{ datastore_name }}"
         state: poweredoff
+        hardware:
+          memory_mb: 4096
+          num_cpus: 2
+        wait_for_ip_address: no
+      loop: "{{ vms_to_clone }}"
