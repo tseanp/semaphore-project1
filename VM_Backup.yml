@@ -28,10 +28,3 @@
         datastore: "{{ datastore_name }}"
         state: poweredoff
       loop: "{{ vms_to_clone }}"
-    
-    - name: Remove cloned VMs from inventory but keep files (PowerCLI)
-      win_shell: |
-        Connect-VIServer -Server "{{ vcenter_hostname }}" -User "{{ vcenter_username }}" -Password "{{ vcenter_password }}"
-        Get-VM -Name "{{ item.base_name }}{{ date_suffix }}" | Remove-VM -DeletePermanently:$false -Confirm:$false
-        Disconnect-VIServer -Confirm:$false
-      loop: "{{ vms_to_clone }}"
