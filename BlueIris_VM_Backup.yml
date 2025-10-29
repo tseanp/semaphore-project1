@@ -11,8 +11,8 @@
     vm_folder: "vm" 
     date_suffix: "{{ lookup('pipe', 'date +%m%d%Y') }}"
     vms_to_clone:
-      - { template: "BlueIris",  name: "BlueIris_Backup_" }
-      - { template: "JellyFin",  name: "JellyFin_Backup_" }
+      - { template: "BlueIris",  base_name: "BlueIris_Backup_" }
+      - { template: "JellyFin",  base_name: "JellyFin_Backup_" }
 
   tasks:
     - name: Clone VMs in vCenter
