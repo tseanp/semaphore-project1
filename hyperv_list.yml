@@ -1,16 +1,14 @@
 ---
-- name: Connect to Hyper-V hosts and list VMs
+- name: Hyper-V Test Playbook for Semaphore
   hosts: hyperv
   gather_facts: no
-  collections:
-    - community.windows
 
   tasks:
-    - name: Test connection to host
-      win_ping:
+    - name: Test connection to Hyper-V host
+      community.windows.win_ping:
 
     - name: List all Hyper-V VMs
-      hyperv_guest_info:
+      community.windows.hyperv_guest_info:
       register: hyperv_vms
 
     - name: Show VM list
