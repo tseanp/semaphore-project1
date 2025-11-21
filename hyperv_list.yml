@@ -4,9 +4,6 @@
   gather_facts: no
 
   tasks:
-    - name: Test connection to Hyper-V host
-      community.windows.win_ping:
-
     - name: List all Hyper-V VMs
       community.windows.hyperv_guest_info:
       register: hyperv_vms
