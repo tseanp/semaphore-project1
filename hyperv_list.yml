@@ -1,0 +1,16 @@
+---
+- name: Connect to Hyper-V hosts and list VMs
+  hosts: hyperv
+  gather_facts: no
+
+  tasks:
+    - name: Test connection to host
+      ansible.windows.win_ping:
+
+    - name: List all Hyper-V VMs
+      community.windows.hyperv_guest_info:
+      register: hyperv_vms
+
+    - name: Show VM list
+      debug:
+        var: hyperv_vms.guests
