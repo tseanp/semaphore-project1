@@ -2,6 +2,8 @@
 - name: Connect to Hyper-V hosts and list VMs
   hosts: hyperv
   gather_facts: no
+  collections:
+    - community.windows
 
   tasks:
     - name: Test connection to host
